@@ -133,7 +133,7 @@ void prepare(std::string file_path, std::ofstream& of_query)
         }
     }
     std::cout << "The number of nodes: " << node.size() << std::endl;
-
+    // sort by lat,long and uniq
     sort( edge.begin(), edge.end() );
     edge.erase( unique( edge.begin(), edge.end() ), edge.end() );
     std::cout << "The number of edges: " << edge.size() << std::endl;
@@ -184,6 +184,7 @@ void prepare(std::string file_path, std::ofstream& of_query)
 }
 
 void initial_insertion(std::ofstream& of_query) {
+    // generate some points on the road
     for(int id=0; id<MIN_OBJECT; id++) {
         std::string query;
         random_insertion(id, query);
@@ -202,6 +203,7 @@ void one_episode(std::ofstream& of_query, const int ticks_per_episode) {
 
     for(int tick=0; tick<ticks_per_episode; tick++) {
         if(tick < quarter_ticks) { // Minimum phase
+            // generate random insertions and queries
             std::cout << "Minimum phase" << std::endl;
             random_move_and_scan_queries(0, MIN_OBJECT-1, query_per_tick, of_query);
         }
@@ -264,8 +266,9 @@ void random_move_and_scan_queries(const int start_id, const int end_id, const in
         else {
             int id = rand(gen_D);
             for(int j=0; j<random_move_trial; j++) {
-                random_move(id);
+                random_move(id); // random move to some street
             }
+            // calculate the new coord on the street
             objects[id].current = decide_real_position_on_road(objects[id].start_node_idx, objects[id].end_node_idx);
             output_insertion_query(id, of_query);
         }
@@ -300,6 +303,7 @@ void scan_query(const int start_id, const int end_id, std::ofstream& of_query) {
     ss << std::setprecision(precision);
     bool true_range_false_knn;
     (num_scan_query++ % 2 == 0)? true_range_false_knn = true: true_range_false_knn = false;
+    true_range_false_knn = true;
     true_range_false_knn? ss << "RANGE ": ss << "KNN ";
     ss << start_lon << " " << start_lat << " " << end_lon << " " << end_lat;
     if(!true_range_false_knn) {
@@ -352,12 +356,12 @@ void random_insertion(uint64_t target_id, std::string& query)
 {
     Object& o = objects[target_id];
 
-    int start_idx = rand_node(gen_D);
+    int start_idx = rand_node(gen_D); // pick an edge on the map
     int end_idx = decide_next_destination_node(-1, start_idx);
 
     o.start_node_idx = start_idx;
     o.end_node_idx = end_idx;
-    o.current = decide_real_position_on_road(start_idx, end_idx);
+    o.current = decide_real_position_on_road(start_idx, end_idx); // generate rand a point on the edge
     o.deleted = false;
 
     std::ostringstream ss;
@@ -412,18 +416,18 @@ void insertion_into_center_of_space(uint64_t target_id, std::string& query)
                 break;
             }
         }
-
+        // random point on 2d space?
         sample_lat = std::min(min_lat_D + ((max_lat_D - min_lat_D) * (sample_lat + 4) / 8), max_lat_D);
         sample_lon = std::min(min_lon_D + ((max_lon_D - min_lon_D) * (sample_lon + 4) / 8), max_lon_D);
 
         auto cell_coord = cal_cell_coord(sample_lat, sample_lon);
-
+        // node ids
         const std::vector<int> &candidates = grid_nodes[cell_coord.first][cell_coord.second];
         if(candidates.empty()) {
             continue;
         }
         double min_distance = std::numeric_limits<double>::max();
-
+        // closest point in the cell
         for (int i: candidates) {
             const RealCoord& n = node[i];
             double distance = pow(n.lat - sample_lat, 2) + pow(n.lon - sample_lon, 2);
