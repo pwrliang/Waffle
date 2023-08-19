@@ -66,3 +66,8 @@ The predefined system parameters, which are not automatically tuned by Waffle, a
 [3] https://github.com/oneapi-src/oneTBB<br>
 [4] https://github.com/Corvusoft/restbed<br>
 [5] https://github.com/nlohmann/json<br>
+
+
+### Build
+- source  /opt/intel/oneapi/tbb/latest/env/vars.sh
+- vim /local/storage/liang/deps/libtorch/share/cmake/Caffe2/public/cuda.cmake:30:set(CMAKE_CUDA_COMPILER /home/geng.161/.local/cuda/bin/nvcc)
