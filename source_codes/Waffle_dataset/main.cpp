@@ -7,6 +7,7 @@
 #include <random>
 #include <iomanip>
 #include <algorithm>
+#include <unordered_set>
 #include <cassert>
 #include "utils.h"
 #include "parameters.h"
@@ -65,9 +66,9 @@ uint64_t num_scan_query = 0;
 
 int main(int argc, char const *argv[]) {
     if (argc != 4) {
-        std::cerr << "1. The absolute path to the road dataset" << std::endl;
-        std::cerr << "2. The output file name with the absolute path" << std::endl;
-        std::cerr << "3. The number of episodes" << std::endl;
+        std::cerr << "1. The absolute path to the road dataset" << "\n";
+        std::cerr << "2. The output file name with the absolute path" << "\n";
+        std::cerr << "3. The number of episodes" << "\n";
         return 1;
     }
 
@@ -80,15 +81,19 @@ int main(int argc, char const *argv[]) {
 
     const uint64_t total_episode = std::stoull(std::string(argv[3]));
 
+    of_query << "# Initial Insertion\n";
+
     initial_insertion(of_query);
+    
+    of_query << "TICK " << global_tick << "\n";
 
     for (int episode = 0; episode < total_episode; episode++) {
         one_episode(of_query, ticks_per_episode);
-        std::cout << "Episode: " << episode << std::endl;
-        of_query << "EPISODE " << episode << std::endl;
+        std::cout << "Episode: " << episode << "\n";
+        of_query << "EPISODE " << episode << "\n";
     }
 
-    of_query << "TERMINATE" << std::endl;
+    of_query << "TERMINATE" << "\n";
 
     return 0;
 }
@@ -160,11 +165,11 @@ void prepare(std::string file_path, std::ofstream &of_query) {
             edge.emplace_back(start_node_idx, end_node_idx);
         }
     }
-    std::cout << "The number of nodes: " << node.size() << std::endl;
+    std::cout << "The number of nodes: " << node.size() << "\n";
     // sort by lat,long and uniq
     sort(edge.begin(), edge.end());
     edge.erase(unique(edge.begin(), edge.end()), edge.end());
-    std::cout << "The number of edges: " << edge.size() << std::endl;
+    std::cout << "The number of edges: " << edge.size() << "\n";
 
     for (auto one_node: node) {
         min_lat_D = std::min(min_lat_D, one_node.lat);
@@ -208,7 +213,7 @@ void prepare(std::string file_path, std::ofstream &of_query) {
     std::ostringstream ss;
     ss << std::setprecision(precision);
     ss << "SETSPACE " << min_lon_D << " " << min_lat_D << " " << max_lon_D << " " << max_lat_D;
-    of_query << ss.str() << std::endl;
+    of_query << ss.str() << "\n";
 }
 
 void initial_insertion(std::ofstream &of_query) {
@@ -216,7 +221,7 @@ void initial_insertion(std::ofstream &of_query) {
     for (int id = 0; id < MIN_OBJECT; id++) {
         std::string query;
         random_insertion(id, query);
-        of_query << query << std::endl;
+        of_query << query << "\n";
     }
 }
 
@@ -232,14 +237,16 @@ void one_episode(std::ofstream &of_query, const int ticks_per_episode) {
     for (int tick = 0; tick < ticks_per_episode; tick++) {
         if (tick < quarter_ticks) { // Minimum phase
             // generate random insertions and queries
-            std::cout << "Minimum phase" << std::endl;
+            std::cout << "Minimum phase" << "\n";
+            of_query << "# Minimum phase\n";
             random_move_and_scan_queries(0, MIN_OBJECT - 1, query_per_tick, of_query);
         } else if (tick < quarter_ticks * 2) { // Growing phase
             int _tick = tick - quarter_ticks;
             int start_id = MIN_OBJECT + delta * _tick;
             int end_id = MIN_OBJECT + delta * (_tick + 1);
             std::cout << "Object with ID [" << start_id << " ~ " << end_id - 1
-                      << "] is inserted." << std::endl;
+                      << "] is inserted." << "\n";
+            of_query << "# Growing phase\n";
             int num_queries = 0;
             for (int id = start_id; id < end_id; id++) {
                 if (id % range_or_knn_frequency == 0) {
@@ -250,19 +257,21 @@ void one_episode(std::ofstream &of_query, const int ticks_per_episode) {
                 std::string query;
                 (id < start_id + delta_center) ? insertion_into_center_of_space(id, query) : random_insertion(id,
                                                                                                               query);
-                of_query << query << std::endl;
+                of_query << query << "\n";
                 num_queries++;
             }
             random_move_and_scan_queries(0, start_id - 1, query_per_tick - num_queries, of_query);
         } else if (tick < quarter_ticks * 3) { // Maximum phase
-            std::cout << "Maximum phase" << std::endl;
+            std::cout << "Maximum phase" << "\n";
+            of_query << "# Maximum phase\n";
             random_move_and_scan_queries(0, MAX_OBJECT - 1, query_per_tick, of_query);
         } else { // Shrinking phase
             int _tick = tick - quarter_ticks * 3;
             int start_id = MAX_OBJECT - delta * (_tick + 1);
             int end_id = MAX_OBJECT - delta * _tick;
             std::cout << "Object with ID [" << start_id << " ~ " << end_id - 1 << "] is deleted."
-                      << std::endl;
+                      << "\n";
+            of_query << "# Shrinking phase\n";
             int num_queries = 0;
             for (int id = start_id; id < end_id; id++) {
                 if (id % range_or_knn_frequency == 0) {
@@ -270,7 +279,7 @@ void one_episode(std::ofstream &of_query, const int ticks_per_episode) {
                     num_queries++;
                 }
                 std::string query = "DELETE " + std::to_string(id);
-                of_query << query << std::endl;
+                of_query << query << "\n";
                 objects[id].deleted = true;
                 num_queries++;
             }
@@ -278,19 +287,27 @@ void one_episode(std::ofstream &of_query, const int ticks_per_episode) {
         }
 
         global_tick++;
-        std::cout << "Tick: " << global_tick << std::endl;
-        of_query << "TICK " << global_tick << std::endl;
+        std::cout << "Tick: " << global_tick << "\n";
+        of_query << "TICK " << global_tick << "\n";
     }
 }
 
 void
 random_move_and_scan_queries(const int start_id, const int end_id, const int num_queries, std::ofstream &of_query) {
     std::uniform_int_distribution<int> rand(start_id, end_id);
+    std::unordered_set<int> ids;
+
     for (int i = 0; i < num_queries; i++) {
         if (i % range_or_knn_frequency == 0) {
             scan_query(start_id, end_id, of_query);
         } else {
             int id = rand(gen_D);
+
+            if (ids.find(id) != ids.end()) {
+                continue;
+            }
+            ids.insert(id);
+
             for (int j = 0; j < random_move_trial; j++) {
                 random_move(id); // random move to some street
             }
@@ -334,7 +351,7 @@ void scan_query(const int start_id, const int end_id, std::ofstream &of_query) {
     if (!true_range_false_knn) {
         ss << " " << k;
     }
-    of_query << ss.str() << std::endl;
+    of_query << ss.str() << "\n";
 }
 
 void random_move(int id) {
@@ -348,14 +365,13 @@ void random_move(int id) {
 }
 
 void output_insertion_query(const int id, std::ofstream &of_query) {
-
     std::ostringstream ss;
     ss << std::setprecision(precision);
     ss << "INSERT " << id << " "
        << objects[id].current.lon << " "
        << objects[id].current.lat;
 
-    of_query << ss.str() << std::endl;
+    of_query << ss.str() << "\n";
 }
 
 int decide_next_destination_node(const int previous_start_node, const int new_start_node) {

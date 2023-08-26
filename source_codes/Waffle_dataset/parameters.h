@@ -1,8 +1,8 @@
 #ifndef PARAMETERS_H
 #define PARAMETERS_H
 
-const int MIN_OBJECT = 100000; // points in minimum phase
-const int MAX_OBJECT = 2000000;
+const int MIN_OBJECT = 1000000; // initial insert MIN_OBJECT points, also used in minimum phase
+const int MAX_OBJECT = 10000000;
 const int RANDOM_INSERTION = 900000;
 const int CENTER_INSERTION = 1000000;
 
