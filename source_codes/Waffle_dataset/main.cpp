@@ -84,7 +84,7 @@ int main(int argc, char const *argv[]) {
     of_query << "# Initial Insertion\n";
 
     initial_insertion(of_query);
-    
+
     of_query << "TICK " << global_tick << "\n";
 
     for (int episode = 0; episode < total_episode; episode++) {
@@ -308,6 +308,7 @@ random_move_and_scan_queries(const int start_id, const int end_id, const int num
             }
             ids.insert(id);
 
+            objects[id].deleted = false;
             for (int j = 0; j < random_move_trial; j++) {
                 random_move(id); // random move to some street
             }
@@ -321,6 +322,9 @@ random_move_and_scan_queries(const int start_id, const int end_id, const int num
 void scan_query(const int start_id, const int end_id, std::ofstream &of_query) {
     std::uniform_int_distribution<int> rand(start_id, end_id); // [a,b]
     int random_id = rand(gen_D);
+    while (objects[random_id].deleted) {
+        random_id = rand(gen_D);
+    }
 
     auto &target_object = objects[random_id];
     double center_lon = target_object.current.lon;
@@ -340,6 +344,9 @@ void scan_query(const int start_id, const int end_id, std::ofstream &of_query) {
     double start_lat = std::max(center_lat - range_size_lat, min_lat_D);
     double end_lon = std::min(center_lon + range_size_lon, max_lon_D);
     double end_lat = std::min(center_lat + range_size_lat, max_lat_D);
+
+    assert(start_lon < end_lon);
+    assert(start_lat < end_lat);
 
     std::ostringstream ss;
     ss << std::setprecision(precision);
@@ -362,6 +369,7 @@ void random_move(int id) {
 
     o.start_node_idx = new_start_node;
     o.end_node_idx = destination_node;
+    assert(!o.deleted);
 }
 
 void output_insertion_query(const int id, std::ofstream &of_query) {
@@ -370,6 +378,7 @@ void output_insertion_query(const int id, std::ofstream &of_query) {
     ss << "INSERT " << id << " "
        << objects[id].current.lon << " "
        << objects[id].current.lat;
+    assert(!objects[id].deleted);
 
     of_query << ss.str() << "\n";
 }

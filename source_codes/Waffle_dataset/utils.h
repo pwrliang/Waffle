@@ -36,7 +36,7 @@ struct Object {
     int start_node_idx;
     int end_node_idx;
     RealCoord current;
-    bool deleted;
+    bool deleted = true;
 };
 
 struct normal_random_variable
