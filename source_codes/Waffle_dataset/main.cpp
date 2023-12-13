@@ -352,7 +352,6 @@ void scan_query(const int start_id, const int end_id, std::ofstream &of_query) {
     ss << std::setprecision(precision);
     bool true_range_false_knn;
     (num_scan_query++ % 2 == 0) ? true_range_false_knn = true : true_range_false_knn = false;
-    true_range_false_knn = true;
     true_range_false_knn ? ss << "RANGE " : ss << "KNN ";
     ss << start_lon << " " << start_lat << " " << end_lon << " " << end_lat;
     if (!true_range_false_knn) {
