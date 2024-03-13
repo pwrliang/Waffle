@@ -114,6 +114,7 @@ void write_conf(const std::string &file_path, std::ofstream &of_query) {
     of_query << "# range_size_percent_min = " << range_size_percent_min << "\n";
     of_query << "# range_size_percent_max = " << range_size_percent_max << "\n";
     of_query << "# range_or_knn_frequency = " << range_or_knn_frequency << "\n";
+    of_query << "# query_batch_size_max = " << query_batch_size_max << "\n";
     of_query << "# precision = " << precision << "\n";
     of_query << "# query_per_tick = " << query_per_tick << "\n";
     of_query << "# ticks_per_episode = " << ticks_per_episode << "\n";
@@ -236,6 +237,7 @@ void one_episode(std::ofstream &of_query, const int ticks_per_episode, const int
     int delta_center = CENTER_INSERTION / quarter_ticks;
     int delta_random = RANDOM_INSERTION / quarter_ticks;
     int delta = delta_center + delta_random;
+    std::uniform_int_distribution<int> rand_queries(1, query_batch_size_max);
 
     for (int tick = 0; tick < ticks_per_episode; tick++) {
         if (tick < quarter_ticks) { // Minimum phase
@@ -256,7 +258,10 @@ void one_episode(std::ofstream &of_query, const int ticks_per_episode, const int
             int num_queries = 0;
             for (int id = start_id; id < end_id; id++) {
                 if (id % range_or_knn_frequency == 0) {
-                    scan_query(0, id - 1, of_query);
+                    auto batch_size = rand_queries(gen_D);
+                    for (int i = 0; i < batch_size; i++) {
+                        scan_query(0, id - 1, of_query);
+                    }
                     num_queries++;
                 }
 
@@ -285,7 +290,10 @@ void one_episode(std::ofstream &of_query, const int ticks_per_episode, const int
             int num_queries = 0;
             for (int id = start_id; id < end_id; id++) {
                 if (id % range_or_knn_frequency == 0) {
-                    scan_query(0, start_id - 1, of_query);
+                    auto batch_size = rand_queries(gen_D);
+                    for (int i = 0; i < batch_size; i++) {
+                        scan_query(0, id - 1, of_query);
+                    }
                     num_queries++;
                 }
                 std::string query = "DELETE " + std::to_string(id);
@@ -309,11 +317,15 @@ void one_episode(std::ofstream &of_query, const int ticks_per_episode, const int
 void
 random_move_and_scan_queries(const int start_id, const int end_id, const int num_queries, std::ofstream &of_query) {
     std::uniform_int_distribution<int> rand(start_id, end_id);
+    std::uniform_int_distribution<int> rand_queries(1, query_batch_size_max);
     std::unordered_set<int> ids;
 
     for (int i = 0; i < num_queries; i++) {
         if (i % range_or_knn_frequency == 0) {
-            scan_query(start_id, end_id, of_query);
+            auto batch_size = rand_queries(gen_D);
+            for (int j = 0; j < batch_size; j++) {
+                scan_query(start_id, end_id, of_query);
+            }
         } else {
             int id = rand(gen_D);
 
@@ -365,7 +377,8 @@ void scan_query(const int start_id, const int end_id, std::ofstream &of_query) {
     std::ostringstream ss;
     ss << std::setprecision(precision);
     bool true_range_false_knn;
-    (num_scan_query++ % 2 == 0) ? true_range_false_knn = true : true_range_false_knn = false;
+//    (num_scan_query++ % 2 == 0) ? true_range_false_knn = true : true_range_false_knn = false;
+    true_range_false_knn = true;
     true_range_false_knn ? ss << "RANGE " : ss << "KNN ";
     ss << start_lon << " " << start_lat << " " << end_lon << " " << end_lat;
     if (!true_range_false_knn) {
