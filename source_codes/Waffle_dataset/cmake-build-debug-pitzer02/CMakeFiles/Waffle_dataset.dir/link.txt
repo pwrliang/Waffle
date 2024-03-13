@@ -1,1 +1,0 @@
-/apps/gnu/8.4.0/bin/g++ -g CMakeFiles/Waffle_dataset.dir/main.cpp.o -o Waffle_dataset 
