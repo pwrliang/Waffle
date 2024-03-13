@@ -43,7 +43,7 @@ RealCoord decide_real_position_on_road(int start_idx, int end_idx);
 
 int decide_next_destination_node(int previous_start_node, int new_start_node);
 
-void one_episode(std::ofstream &of_query, const int ticks_per_episode);
+void one_episode(std::ofstream &of_query, const int ticks_per_episode, const int episode);
 
 void random_insertion(uint64_t target_id, std::string &query);
 
@@ -59,17 +59,20 @@ std::pair<int, int> cal_cell_coord(double lat, double lon);
 
 void output_insertion_query(const int id, std::ofstream &of_query);
 
+void output_objects(const int start_id, const int end_id, const int episode, const int tick);
+
 std::random_device rd_D;
 std::mt19937 gen_D(rd_D());
 std::uniform_int_distribution<uint64_t> rand_node;
 uint64_t num_scan_query = 0;
 
 int main(int argc, char const *argv[]) {
+
     if (argc != 4) {
-        std::cerr << "1. The absolute path to the road dataset" << "\n";
-        std::cerr << "2. The output file name with the absolute path" << "\n";
-        std::cerr << "3. The number of episodes" << "\n";
-        return 1;
+        std::cerr << "1. The absolute path to the road dataset" << std::endl;
+        std::cerr << "2. The output file name with the absolute path" << std::endl;
+        std::cerr << "3. The number of episodes" << std::endl;
+        return EXIT_FAILURE;
     }
 
     std::string output_file_path(argv[2]);
@@ -88,14 +91,14 @@ int main(int argc, char const *argv[]) {
     of_query << "TICK " << global_tick << "\n";
 
     for (int episode = 0; episode < total_episode; episode++) {
-        one_episode(of_query, ticks_per_episode);
+        one_episode(of_query, ticks_per_episode, episode);
         std::cout << "Episode: " << episode << "\n";
         of_query << "EPISODE " << episode << "\n";
     }
 
     of_query << "TERMINATE" << "\n";
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void write_conf(const std::string &file_path, std::ofstream &of_query) {
@@ -225,7 +228,7 @@ void initial_insertion(std::ofstream &of_query) {
     }
 }
 
-void one_episode(std::ofstream &of_query, const int ticks_per_episode) {
+void one_episode(std::ofstream &of_query, const int ticks_per_episode, const int episode) {
     assert(ticks_per_episode % 4 == 0);
     int quarter_ticks = ticks_per_episode / 4;
 
@@ -240,6 +243,9 @@ void one_episode(std::ofstream &of_query, const int ticks_per_episode) {
             std::cout << "Minimum phase" << "\n";
             of_query << "# Minimum phase\n";
             random_move_and_scan_queries(0, MIN_OBJECT - 1, query_per_tick, of_query);
+            if (output_objects_to_file) {
+                output_objects(0, MIN_OBJECT - 1, episode, tick);
+            }
         } else if (tick < quarter_ticks * 2) { // Growing phase
             int _tick = tick - quarter_ticks;
             int start_id = MIN_OBJECT + delta * _tick;
@@ -265,6 +271,10 @@ void one_episode(std::ofstream &of_query, const int ticks_per_episode) {
             std::cout << "Maximum phase" << "\n";
             of_query << "# Maximum phase\n";
             random_move_and_scan_queries(0, MAX_OBJECT - 1, query_per_tick, of_query);
+
+            if (output_objects_to_file) {
+                output_objects(0, MAX_OBJECT - 1, episode, tick);
+            }
         } else { // Shrinking phase
             int _tick = tick - quarter_ticks * 3;
             int start_id = MAX_OBJECT - delta * (_tick + 1);
@@ -284,6 +294,10 @@ void one_episode(std::ofstream &of_query, const int ticks_per_episode) {
                 num_queries++;
             }
             random_move_and_scan_queries(0, start_id - 1, query_per_tick - num_queries, of_query);
+
+            if (output_objects_to_file) {
+                output_objects(0, start_id - 1, episode, tick);
+            }
         }
 
         global_tick++;
@@ -505,4 +519,20 @@ std::pair<int, int> cal_cell_coord(double lat, double lon) {
     int cell_lon = std::min((int) ((lon - min_lon_D) / (max_lon_D - min_lon_D) * 1000), 999);
 
     return std::make_pair(cell_lat, cell_lon);
+}
+
+// To output objects whose IDs are [start_id, end_id] to a file.
+// The file is used to visualize the objects.
+void output_objects(const int start_id, const int end_id, const int episode, const int tick) {
+    assert(path_to_objects_file == "" || (path_to_objects_file != "" && path_to_objects_file.back() == '/'));
+
+    std::ofstream f(
+            path_to_objects_file + "Objects_Episode" + std::to_string(episode) + "_Tick" + std::to_string(tick));
+    for (int id = start_id; id <= end_id; id++) {
+        std::ostringstream ss;
+        ss << std::setprecision(precision);
+        ss << objects[id].current.lat << "," << objects[id].current.lon;
+        f << ss.str() << std::endl;
+    }
+    f.close();
 }

@@ -1,0 +1,127 @@
+{
+	"kind" : "toolchains",
+	"toolchains" : 
+	[
+		{
+			"compiler" : 
+			{
+				"id" : "GNU",
+				"implicit" : 
+				{
+					"includeDirectories" : 
+					[
+						"/apps/cuda/11.8.0/include",
+						"/opt/intel/19.0.5/compilers_and_libraries_2019/linux/mkl/include",
+						"/opt/intel/19.0.5/compilers_and_libraries_2019/linux/tbb/include",
+						"/apps/gnu/8.4.0/lib/gcc/x86_64-pc-linux-gnu/8.4.0/include",
+						"/usr/local/include",
+						"/apps/gnu/8.4.0/include",
+						"/apps/gnu/8.4.0/lib/gcc/x86_64-pc-linux-gnu/8.4.0/include-fixed",
+						"/usr/include"
+					],
+					"linkDirectories" : 
+					[
+						"/apps/gnu/8.4.0/lib/gcc/x86_64-pc-linux-gnu/8.4.0",
+						"/apps/gnu/8.4.0/lib64",
+						"/lib64",
+						"/usr/lib64",
+						"/opt/intel/19.0.5/compilers_and_libraries_2019/linux/lib/intel64_lin",
+						"/opt/intel/19.0.5/compilers_and_libraries_2019/linux/daal/lib/intel64_lin",
+						"/opt/intel/19.0.5/compilers_and_libraries_2019/linux/ipp/lib/intel64_lin",
+						"/opt/intel/19.0.5/compilers_and_libraries_2019/linux/mkl/lib/intel64_lin",
+						"/opt/intel/19.0.5/compilers_and_libraries_2019/linux/tbb/lib/intel64_lin/gcc4.4",
+						"/apps/cuda/11.8.0/lib64",
+						"/apps/gnu/8.4.0/lib"
+					],
+					"linkFrameworkDirectories" : [],
+					"linkLibraries" : 
+					[
+						"gcc",
+						"gcc_s",
+						"c",
+						"gcc",
+						"gcc_s"
+					]
+				},
+				"path" : "/apps/gnu/8.4.0/bin/gcc",
+				"version" : "8.4.0"
+			},
+			"language" : "C",
+			"sourceFileExtensions" : 
+			[
+				"c",
+				"m"
+			]
+		},
+		{
+			"compiler" : 
+			{
+				"id" : "GNU",
+				"implicit" : 
+				{
+					"includeDirectories" : 
+					[
+						"/apps/cuda/11.8.0/include",
+						"/opt/intel/19.0.5/compilers_and_libraries_2019/linux/mkl/include",
+						"/opt/intel/19.0.5/compilers_and_libraries_2019/linux/tbb/include",
+						"/apps/gnu/8.4.0/include/c++/8.4.0",
+						"/apps/gnu/8.4.0/include/c++/8.4.0/x86_64-pc-linux-gnu",
+						"/apps/gnu/8.4.0/include/c++/8.4.0/backward",
+						"/apps/gnu/8.4.0/lib/gcc/x86_64-pc-linux-gnu/8.4.0/include",
+						"/usr/local/include",
+						"/apps/gnu/8.4.0/include",
+						"/apps/gnu/8.4.0/lib/gcc/x86_64-pc-linux-gnu/8.4.0/include-fixed",
+						"/usr/include"
+					],
+					"linkDirectories" : 
+					[
+						"/apps/gnu/8.4.0/lib/gcc/x86_64-pc-linux-gnu/8.4.0",
+						"/apps/gnu/8.4.0/lib64",
+						"/lib64",
+						"/usr/lib64",
+						"/opt/intel/19.0.5/compilers_and_libraries_2019/linux/lib/intel64_lin",
+						"/opt/intel/19.0.5/compilers_and_libraries_2019/linux/daal/lib/intel64_lin",
+						"/opt/intel/19.0.5/compilers_and_libraries_2019/linux/ipp/lib/intel64_lin",
+						"/opt/intel/19.0.5/compilers_and_libraries_2019/linux/mkl/lib/intel64_lin",
+						"/opt/intel/19.0.5/compilers_and_libraries_2019/linux/tbb/lib/intel64_lin/gcc4.4",
+						"/apps/cuda/11.8.0/lib64",
+						"/apps/gnu/8.4.0/lib"
+					],
+					"linkFrameworkDirectories" : [],
+					"linkLibraries" : 
+					[
+						"stdc++",
+						"m",
+						"gcc_s",
+						"gcc",
+						"c",
+						"gcc_s",
+						"gcc"
+					]
+				},
+				"path" : "/apps/gnu/8.4.0/bin/g++",
+				"version" : "8.4.0"
+			},
+			"language" : "CXX",
+			"sourceFileExtensions" : 
+			[
+				"C",
+				"M",
+				"c++",
+				"cc",
+				"cpp",
+				"cxx",
+				"mm",
+				"mpp",
+				"CPP",
+				"ixx",
+				"cppm"
+			]
+		}
+	],
+	"version" : 
+	{
+		"major" : 1,
+		"minor" : 0
+	}
+}
