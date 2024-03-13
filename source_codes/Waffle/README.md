@@ -69,6 +69,6 @@ The predefined system parameters, which are not automatically tuned by Waffle, a
 
 
 ### Build
-- Waffle `cmake .. -DCMAKE_PREFIX_PATH=/local/storage/liang/libtorch-cpu -DTBB_DIR=/opt/intel/oneapi/tbb/2021.11/lib/cmake/tbb -DTBB_INCLUDEDIR=/opt/intel/oneapi/tbb/latest/include`
+- Waffle `cmake .. -DCMAKE_PREFIX_PATH=/local/storage/liang/libtorch -DTBB_DIR=/opt/intel/oneapi/tbb/2021.11/lib/cmake/tbb -DTBB_INCLUDEDIR=/opt/intel/oneapi/tbb/latest/include`
 - source  /opt/intel/oneapi/tbb/latest/env/vars.sh
 - vim /local/storage/liang/deps/libtorch/share/cmake/Caffe2/public/cuda.cmake:30:set(CMAKE_CUDA_COMPILER /home/geng.161/.local/cuda/bin/nvcc)

@@ -7,7 +7,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <Waffle WaffleApi={new WaffleApi('http://192.168.219.135:8080')} />
+        <Waffle WaffleApi={new WaffleApi('http://localhost:8080')} />
       </header>
     </div>
   );

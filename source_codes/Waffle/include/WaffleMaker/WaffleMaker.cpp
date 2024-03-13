@@ -38,9 +38,9 @@ double WaffleMaker::update_model(int batch_size)
         reward_batch[i] = e.final_reward;
     }
 
-    state_batch = state_batch.to(torch::kCUDA);
-    action_batch = action_batch.to(torch::kCUDA);
-    reward_batch = reward_batch.to(torch::kCUDA);
+    state_batch = state_batch.to(torch::kCPU);
+    action_batch = action_batch.to(torch::kCPU);
+    reward_batch = reward_batch.to(torch::kCPU);
 
     auto f = model->forward(state_batch, action_batch);
     auto loss = torch::nn::MSELoss()(f, reward_batch);
@@ -83,9 +83,9 @@ void WaffleMaker::load_model(std::string name)
 
 torch::Tensor WaffleMaker::get_priority(int batch_size, torch::Tensor state, torch::Tensor action, torch::Tensor reward)
 {
-    state = state.to(torch::kCUDA);
-    action = action.to(torch::kCUDA);
-    reward = reward.to(torch::kCUDA);
+    state = state.to(torch::kCPU);
+    action = action.to(torch::kCPU);
+    reward = reward.to(torch::kCPU);
 
     state = state.reshape({batch_size, 1, nCell_state_lat, nCell_state_lon});
     action = action.reshape({batch_size, 1, NUM_WAFFLE_KNOBS});
@@ -114,8 +114,8 @@ torch::Tensor WaffleMaker::exploitation(torch::Tensor state)
         action_batch[i] = recent_action[i];
     }
 
-    state_batch = state_batch.to(torch::kCUDA);
-    action_batch = action_batch.to(torch::kCUDA);
+    state_batch = state_batch.to(torch::kCPU);
+    action_batch = action_batch.to(torch::kCPU);
 
     torch::Tensor reward;
     model->eval();
@@ -143,8 +143,8 @@ torch::Tensor WaffleMaker::exploration(torch::Tensor state, int batch_size, cons
         state_batch[i][0] = state;
     }
 
-    state_batch = state_batch.to(torch::kCUDA);
-    action_batch = action_batch.to(torch::kCUDA);
+    state_batch = state_batch.to(torch::kCPU);
+    action_batch = action_batch.to(torch::kCPU);
 
     torch::Tensor reward;
     model->eval();
@@ -169,8 +169,8 @@ torch::Tensor WaffleMaker::exploration(torch::Tensor state, int batch_size, cons
 
 double WaffleMaker::get_reward(torch::Tensor state, torch::Tensor action)
 {
-    state = state.to(torch::kCUDA);
-    action = action.to(torch::kCUDA);
+    state = state.to(torch::kCPU);
+    action = action.to(torch::kCPU);
 
     state = state.reshape({1, 1, nCell_state_lat, nCell_state_lon});
     action = action.reshape({1, 1, NUM_WAFFLE_KNOBS});
@@ -195,5 +195,5 @@ void WaffleMaker::initialize_model(double _lr)
     model = std::make_shared<Model>(Model());
     model_optimizer = std::make_shared<torch::optim::Adam>(
         torch::optim::Adam(model->parameters(), torch::optim::AdamOptions().lr(lr).weight_decay(weight_decay)));
-    model->to(torch::kCUDA);
+    model->to(torch::kCPU);
 }
