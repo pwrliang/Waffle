@@ -24,6 +24,8 @@ add_library(include STATIC ${SOURCE_FILES} ${HEADER_FILES})
 find_package(Torch REQUIRED)
 target_link_libraries(include PUBLIC "${TORCH_LIBRARIES}")
 
+include_directories(${TBB_INCLUDEDIR})
+
 include_directories(WaffleMaker)
 add_subdirectory(WaffleMaker)
 target_link_libraries(include PUBLIC WaffleMaker)

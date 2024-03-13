@@ -217,6 +217,9 @@ void Waffle::client()
 
     while (true)
     {
+        std::string query;
+        std::getline(query_file, query);
+        if (query[0] == '#') { continue; }
         auto current_time = std::chrono::high_resolution_clock::now();
         std::unique_lock<std::mutex> lock_time(Waffle::m_time);
         auto elapsed_time =
@@ -240,8 +243,6 @@ void Waffle::client()
             break;
         }
 
-        std::string query;
-        std::getline(query_file, query);
         std::vector<std::string> split_query;
         split_line(query, split_query, ' ');
 

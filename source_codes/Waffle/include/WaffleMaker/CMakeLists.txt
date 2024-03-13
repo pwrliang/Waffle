@@ -17,3 +17,4 @@ target_link_libraries(WaffleMaker PUBLIC "${TORCH_LIBRARIES}")
 
 find_package(TBB REQUIRED)
 target_link_libraries(WaffleMaker PUBLIC TBB::tbb)
+include_directories(${TBB_INCLUDEDIR})
